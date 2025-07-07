@@ -5,15 +5,27 @@ require('dotenv').config();                     // .envの読み込み
 
 // .envファイルからLINEの設定を読み込みます
 const config = {
-  channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN, // LINEのアクセストークン
-  channelSecret: process.env.CHANNEL_SECRET             // LINEのシークレット
+  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN, // 修正: LINE_CHANNEL_ACCESS_TOKEN
+  channelSecret: process.env.LINE_CHANNEL_SECRET             // 修正: LINE_CHANNEL_SECRET
 };
+
+// デバッグ用ログ（一時的に追加）
+console.log('=== 環境変数確認 ===');
+console.log('LINE_CHANNEL_ACCESS_TOKEN exists:', !!process.env.LINE_CHANNEL_ACCESS_TOKEN);
+console.log('LINE_CHANNEL_SECRET exists:', !!process.env.LINE_CHANNEL_SECRET);
+console.log('ACCESS_TOKEN length:', process.env.LINE_CHANNEL_ACCESS_TOKEN?.length);
+console.log('SECRET length:', process.env.LINE_CHANNEL_SECRET?.length);
 
 // expressアプリを作成
 const app = express();
 
+// LINE用のクライアントを作成（返信などに使う）
+const client = new line.Client(config);
+
 // LINEのWebhook処理のためのミドルウェアを設定
 app.post('/webhook', line.middleware(config), (req, res) => {
+  console.log('=== Webhook受信 ===');
+  
   // LINEから送られてきたイベントを1件ずつ処理
   Promise
     .all(req.body.events.map(handleEvent))  // 複数イベントでも全部処理
@@ -52,11 +64,15 @@ function handleEvent(event) {
     });
 }
 
-// LINE用のクライアントを作成（返信などに使う）
-const client = new line.Client(config);
-
 // サーバーを起動
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`LINE Botサーバーを起動しました → http://localhost:${PORT}`);
+  console.log(`プライマリURL https://manabu-investment-ai.onrender.comでご利用いただけます`);
+});
+
+// プロセス終了時のハンドリング
+process.on('SIGINT', () => {
+  console.log('サーバーを終了します');
+  process.exit(0);
 });
