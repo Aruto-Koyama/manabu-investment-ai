@@ -70,9 +70,3 @@ app.listen(PORT, () => {
   console.log(`LINE Botサーバーを起動しました → http://localhost:${PORT}`);
   console.log(`プライマリURL https://manabu-investment-ai.onrender.comでご利用いただけます`);
 });
-
-// プロセス終了時のハンドリング
-process.on('SIGINT', () => {
-  console.log('サーバーを終了します');
-  process.exit(0);
-});
